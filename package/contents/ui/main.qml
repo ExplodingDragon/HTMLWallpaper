@@ -21,10 +21,36 @@ import QtQuick 2
 import QtWebEngine 1.7
 
 import org.kde.plasma.plasmoid
+import "." as HtmlWallpaper
 
 WallpaperItem {
+    property int lastManualRefreshToken: wallpaper.configuration.ManualRefreshToken
+
+    Timer {
+        interval: Math.max(1, wallpaper.configuration.ForceRefreshInterval) * 1000
+        repeat: true
+        running: wallpaper.configuration.ForceRefreshInterval > 0
+        triggeredOnStart: false
+        onTriggered: webView.reloadAndBypassCache()
+    }
+
+    Connections {
+        target: wallpaper.configuration
+
+        function onManualRefreshTokenChanged() {
+            if (wallpaper.configuration.ManualRefreshToken === lastManualRefreshToken) {
+                return
+            }
+
+            lastManualRefreshToken = wallpaper.configuration.ManualRefreshToken
+            webView.reloadAndBypassCache()
+        }
+    }
+
     WebEngineView{
+        id: webView
         anchors.fill: parent
+        profile: HtmlWallpaper.SharedProfile.profile
         url: wallpaper.configuration.DisplayPage
         zoomFactor: wallpaper.configuration.ZoomFactor
         backgroundColor: "black"

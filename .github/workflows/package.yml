@@ -1,0 +1,44 @@
+name: Package
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "*"
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gettext
+        run: sudo apt-get update && sudo apt-get install -y gettext zip
+
+      - name: Build package archive
+        id: build
+        run: |
+          chmod +x scripts/build-package.sh
+          archive_path="$(scripts/build-package.sh)"
+          echo "archive_path=$archive_path" >> "$GITHUB_OUTPUT"
+          echo "archive_name=$(basename "$archive_path")" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build.outputs.archive_name }}
+          path: ${{ steps.build.outputs.archive_path }}
+
+      - name: Create release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.build.outputs.archive_path }}
+          generate_release_notes: true

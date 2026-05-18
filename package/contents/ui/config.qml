@@ -23,9 +23,12 @@ import QtQuick.Controls 2
 
 
 ColumnLayout {
+    property var configDialog
+    property var wallpaperConfiguration
     property alias cfg_DisplayPage: displayPageField.text
     property alias cfg_ZoomFactor: zoomFactorSlider.value
     property alias cfg_InsecureHTTPS: insecureHTTPSCheckBox.checked
+    property alias cfg_ForceRefreshInterval: forceRefreshIntervalSpinBox.value
 
     RowLayout {
         Layout.topMargin: 10
@@ -65,6 +68,51 @@ ColumnLayout {
             horizontalAlignment: Text.AlignLeft
 
             text: i18nd("plasma_wallpaper_de.unkn0wn.htmlwallpaper", " https://yourwebsite.com")
+        }
+    }
+
+    RowLayout {
+        spacing: 10
+
+        Label {
+            Layout.minimumWidth: width
+            Layout.maximumWidth: width
+            width: formAlignment - 20
+            horizontalAlignment: Text.AlignRight
+
+            text: i18nd("plasma_wallpaper_de.unkn0wn.htmlwallpaper", "Manual:")
+        }
+        Button {
+            text: i18nd("plasma_wallpaper_de.unkn0wn.htmlwallpaper", "Refresh now")
+            onClicked: {
+                if (wallpaperConfiguration) {
+                    wallpaperConfiguration.ManualRefreshToken =
+                        Number(wallpaperConfiguration.ManualRefreshToken || 0) + 1
+                }
+            }
+        }
+    }
+
+    RowLayout {
+        spacing: 10
+
+        Label {
+            Layout.minimumWidth: width
+            Layout.maximumWidth: width
+            width: formAlignment - 20
+            horizontalAlignment: Text.AlignRight
+
+            text: i18nd("plasma_wallpaper_de.unkn0wn.htmlwallpaper", "Refresh:")
+        }
+        SpinBox {
+            id: forceRefreshIntervalSpinBox
+            from: 0
+            to: 86400
+            stepSize: 10
+            editable: true
+        }
+        Label {
+            text: i18nd("plasma_wallpaper_de.unkn0wn.htmlwallpaper", "seconds (0 disables forced refresh)")
         }
     }
 
@@ -146,6 +194,26 @@ ColumnLayout {
                 text: i18nd("plasma_wallpaper_de.unkn0wn.htmlwallpaper", "Ignore HTTPS errors")
                 visible: parent.hovered
             }
+        }
+    }
+
+    RowLayout {
+        spacing: 10
+
+        Label {
+            Layout.minimumWidth: width
+            Layout.maximumWidth: width
+            width: formAlignment - 20
+            horizontalAlignment: Text.AlignRight
+        }
+        Label {
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
+
+            text: i18nd(
+                "plasma_wallpaper_de.unkn0wn.htmlwallpaper",
+                "Cookies and HTML5 local storage are stored persistently for this wallpaper."
+            )
         }
     }
 
